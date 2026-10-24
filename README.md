@@ -2,7 +2,7 @@
 
 An interactive set of three dashboards that show how I turn financial and business data into clear, decision-ready views.
 
-**Live demo:** https://YOUR-USERNAME.github.io/data-dashboard-showcase
+**Live demo:** https://dzimah35-eng.github.io/data-dashboard-showcase
 
 > **Note:** All data in this project is **simulated** for demonstration. It is not real client, bank or survey data.
 
