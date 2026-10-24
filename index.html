@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Showcase | Natalie</title>
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--text:#1d2433;--muted:#5d6676;--accent:#0f766e;--warn:#c2410c;--bar2:#94a3b8;--border:#e2e5ea;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141b;--surface:#171e28;--text:#e8ecf2;--muted:#9aa5b5;--accent:#4fd1c0;--warn:#fb923c;--bar2:#4b5a70;--border:#273142}}
+:root[data-theme="dark"]{--bg:#0f141b;--surface:#171e28;--text:#e8ecf2;--muted:#9aa5b5;--accent:#4fd1c0;--warn:#fb923c;--bar2:#4b5a70;--border:#273142}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:20px}
+h1{font-size:24px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tabs button{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+.tabs button.on{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+.note{font-size:12px;color:var(--muted);margin-top:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kpi,.panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.kpi b{display:block;font-size:24px;margin-top:2px}.kpi span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:12px}
+.panel h3{margin:0 0 10px;font-size:15px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border)}th{color:var(--muted);font-weight:600;font-size:12px}
+td.n,th.n{text-align:right}
+.flag{color:var(--warn);font-weight:700}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--muted);font-size:11px}
+.lg{font-size:12px;color:var(--muted);margin-top:6px}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px;vertical-align:middle}
+.hide{display:none}
+input[type=range]{width:100%;accent-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Dashboard Showcase</h1>
+<p class="sub">Three sample dashboards built on simulated data to demonstrate analysis and design skills.</p>
+<div class="tabs" id="tabs"></div>
+<div id="d0"></div><div id="d1" class="hide"></div><div id="d2" class="hide"></div>
+<p class="note">All figures are simulated for demonstration only. They are not real client, bank or survey data.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id), f=n=>n.toLocaleString('en-US',{maximumFractionDigits:1});
+const C=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function bars(items,{w=460,h=220,ka='a',kb='b',la='',lb=''}={}){
+ const m=Math.max(...items.flatMap(d=>[d[ka],d[kb]??0]))*1.1,bw=w/items.length;let s=`<svg viewBox="0 0 ${w} ${h+24}">`;
+ items.forEach((d,i)=>{const x=i*bw+bw*.12,a=d[ka]/m*h,b=(d[kb]??0)/m*h,ww=bw*.38;
+ s+=`<rect x="${x}" y="${h-a}" width="${ww}" height="${a}" fill="${C('--bar2')}" rx="2"/>`;
+ if(kb!=='b'||d.b!==undefined)s+=`<rect x="${x+ww+2}" y="${h-b}" width="${ww}" height="${b}" fill="${d.flag?C('--warn'):C('--accent')}" rx="2"/>`;
+ s+=`<text x="${x+ww}" y="${h+14}" text-anchor="middle">${d.n}</text>`});
+ return s+'</svg>'}
+function hbars(items,max){let s=`<svg viewBox="0 0 460 ${items.length*28}">`;
+ items.forEach((d,i)=>{s+=`<text x="0" y="${i*28+16}">${d[0]}</text><rect x="130" y="${i*28+4}" width="${d[1]/max*300}" height="16" fill="${C('--accent')}" rx="2"/><text x="${134+d[1]/max*300}" y="${i*28+17}">${d[1]}</text>`});
+ return s+'</svg>'}
+function line(series,labels,{w=460,h=200,min=0,max=100}={}){let s=`<svg viewBox="0 0 ${w} ${h+26}">`;
+ for(let g=0;g<=4;g++){const y=h-g/4*h;s+=`<line x1="30" x2="${w}" y1="${y}" y2="${y}" stroke="${C('--border')}"/><text x="0" y="${y+4}">${Math.round(min+(max-min)*g/4)}</text>`}
+ const sx=i=>30+i*(w-40)/(labels.length-1),sy=v=>h-(v-min)/(max-min)*h;
+ labels.forEach((l,i)=>s+=`<text x="${sx(i)}" y="${h+18}" text-anchor="middle">${l}</text>`);
+ series.forEach(se=>{s+=`<polyline fill="none" stroke="${se.c}" stroke-width="2.5" points="${se.v.map((v,i)=>sx(i)+','+sy(v)).join(' ')}"/>`;
+ se.v.forEach((v,i)=>s+=`<circle cx="${sx(i)}" cy="${sy(v)}" r="3" fill="${se.c}"/>`)});
+ return s+'</svg>'}
+
+// Dashboard 1: construction project cost control
+const P=[['Block A Offices',4200,3100,4350],['Estate Roads',2800,2300,2790],['Warehouse',1900,1250,2080],['Retail Shell',3300,2900,3320],['Clinic Wing',1500,700,1480],['Apartments',5100,3600,5560]].map(p=>({n:p[0].split(' ')[0],full:p[0],bud:p[1],cost:p[2],eac:p[3],over:(p[3]-p[1])/p[1]*100,flag:(p[3]-p[1])/p[1]>.05}));
+const tot=k=>P.reduce((a,p)=>a+p[k],0),unb=[['Block A Offices',210],['Estate Roads',95],['Warehouse',160],['Retail Shell',40],['Clinic Wing',30],['Apartments',320]];
+$('d0').innerHTML=`<div class="kpis"><div class="kpi"><span>Total budget (GHS k)</span><b>${f(tot('bud'))}</b></div><div class="kpi"><span>Cost to date (GHS k)</span><b>${f(tot('cost'))}</b></div><div class="kpi"><span>Forecast at completion</span><b>${f(tot('eac'))}</b></div><div class="kpi"><span>Projects over 5%</span><b class="flag">${P.filter(p=>p.flag).length}</b></div></div>
+<div class="row"><div class="panel"><h3>Budget vs estimate at completion (GHS k)</h3>${bars(P,{ka:'bud',kb:'eac'})}<div class="lg"><i style="background:var(--bar2)"></i>Budget<i style="background:var(--accent)"></i>EAC<i style="background:var(--warn)"></i>EAC over 5% of budget</div></div>
+<div class="panel"><h3>EAC alerts</h3><div class="scroll"><table><tr><th>Project</th><th class="n">Overrun</th><th>Status</th></tr>${P.map(p=>`<tr><td>${p.full}</td><td class="n">${p.over.toFixed(1)}%</td><td class="${p.flag?'flag':''}">${p.flag?'Alert':'On track'}</td></tr>`).join('')}</table></div></div></div>
+<div class="panel"><h3>WIP: unbilled receivables (GHS k)</h3>${hbars(unb,350)}</div>`;
+
+// Dashboard 2: credit risk threshold
+$('d1').innerHTML=`<div class="kpis"><div class="kpi"><span>Loan records</span><b>5,025</b></div><div class="kpi"><span>Cost ratio (FN:FP)</span><b>5 : 1</b></div><div class="kpi"><span>Optimal threshold</span><b id="opt"></b></div><div class="kpi"><span>Cost at chosen threshold</span><b id="cc"></b></div></div>
+<div class="row"><div class="panel"><h3>Expected cost vs decision threshold</h3><div id="cv"></div><input type="range" id="th" min="5" max="95" value="50"><div class="lg">Threshold: <b id="tv"></b>. Drag to explore the trade-off.</div></div>
+<div class="panel"><h3>Top drivers of default (illustrative SHAP)</h3>${hbars([['Debt-to-income',92],['Credit history length',74],['Loan amount',61],['Employment tenure',48],['Prior delinquencies',44],['Account balance',30]],100)}</div></div>`;
+const cost=t=>{const fn=2000*Math.pow(t,2.2),fp=2400*Math.pow(1-t,2.2);return 5*fn+fp};
+const xs=[...Array(19)].map((_,i)=>(i+1)*5),ys=xs.map(x=>cost(x/100)/1000),best=xs[ys.indexOf(Math.min(...ys))];
+function upd(){const v=+$('th').value;$('tv').textContent=v+'%';$('cc').textContent=f(cost(v/100)/1000)+'k';
+ $('cv').innerHTML=line([{c:C('--accent'),v:ys}],xs.map(x=>x%20==0?x+'%':''),{min:0,max:Math.ceil(Math.max(...ys)/10)*10})}
+$('opt').textContent=best+'%';$('th').oninput=upd;
+
+// Dashboard 3: financial inclusion
+const yr=['2014','2017','2021','2024'];
+$('d2').innerHTML=`<div class="kpis"><div class="kpi"><span>Latest account ownership</span><b>78%</b></div><div class="kpi"><span>Change since 2014</span><b>+37 pts</b></div><div class="kpi"><span>Rural-urban gap</span><b>9 pts</b></div><div class="kpi"><span>Model AUC (illustrative)</span><b>0.86</b></div></div>
+<div class="row"><div class="panel"><h3>Account ownership over time (%)</h3>${line([{c:C('--accent'),v:[41,58,70,78]},{c:C('--bar2'),v:[33,52,66,75]}],yr)}<div class="lg"><i style="background:var(--accent)"></i>Men<i style="background:var(--bar2)"></i>Women</div></div>
+<div class="panel"><h3>Account ownership by group, latest year (%)</h3>${hbars([['Urban',82],['Rural',73],['Higher education',94],['Secondary',84],['Primary or none',63],['Ages 15–24',64]],100)}</div></div>`;
+
+const names=['Project cost control','Credit risk thresholds','Financial inclusion'];
+names.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>show(i);$('tabs').append(b)});
+function show(i){names.forEach((_,j)=>{$('d'+j).classList.toggle('hide',j!==i);$('tabs').children[j].classList.toggle('on',j===i)});if(i===1)upd()}
+show(0);
+matchMedia('(prefers-color-scheme:dark)').onchange=()=>location.reload();
+</script>
+</body>
+</html>
